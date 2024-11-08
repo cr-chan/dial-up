@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::process::{Command, Stdio};
 
@@ -19,14 +19,19 @@ pub fn connect(
     Ok(output)
 }
 
-pub fn dialing_log(output: std::process::Output) {
-    let current_time = Local::now();
+pub fn create_log() -> Result<File, Box<dyn std::error::Error>>{
 
-    let mut log_file = OpenOptions::new()
+    let log_file = OpenOptions::new()
         .create(true)
         .append(true)
-        .open("LOG_FILE")
-        .expect("Failed to open log file");
+        .open("LOG_FILE")?;
+
+    Ok(log_file)
+}
+
+pub fn log_result(mut log_file: File, output: std::process::Output) {
+    
+    let current_time = Local::now();
     if output.status.success() {
         let log_message = format!(
             "{} - Dialing successful\n",
